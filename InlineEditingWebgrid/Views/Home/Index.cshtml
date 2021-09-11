@@ -1,0 +1,135 @@
+﻿@model List<InlineEditingWebgrid.ViewModel.SiteUserModel>
+@{
+    ViewBag.Title = "Index";
+    WebGrid grid = new WebGrid(Model, rowsPerPage: 10);
+}
+<h2>Inplace editing in webgrid</h2>
+<hr />
+<div class="row">
+    @grid.GetHtml(
+        tableStyle: "table table-responsive table-striped table-bordered",
+        columns: grid.Columns(
+            grid.Column(header: "First Name", format:@<text><div class="edit" data-id="@item.ID" data-propertyname="FirstName">@item.FirstName</div></text>),
+grid.Column(header: "Last Name", format:@<text><div class="edit" data-id="@item.ID" data-propertyname="LastName">@item.LastName</div></text>),
+grid.Column(header: "Role", format:@<text><div class="editSelect" data-id="@item.ID" data-propertyname="RoleID">@item.RoleName</div></text>),
+grid.Column(header: "DOB", format:@<text><div class="editDate" data-id="@item.ID" data-propertyname="DOB">@string.Format("{0:dd-MM-yyyy}", item.DOB)</div></text>)
+)
+)
+</div>
+<style>
+    .table td {
+        width: 25%;
+    }
+
+    .w100 {
+        width: 100px;
+    }
+
+    .margin10 {
+        margin-left: 10px;
+    }
+</style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/eggplant/jquery-ui.min.css" rel="stylesheet" />
+@section scripts{
+    <script src="https://www.appelsiini.net/download/jquery.jeditable.js"></script>
+    <script src="~/Scripts/jquery.jeditable.datepicker.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var oldValue = '';
+            $('.edit').editable('/home/saveuser', {
+                cssclass: 'jeditForm',
+                tooltip: 'click to edit me...',
+                width: 'none',
+                height: 'none',
+                onsubmit: function (settings, original) {
+                    oldValue = original.revert;
+                },
+                submitdata: function () {
+                    return {
+                        id: $(this).data('id'),
+                        PropertyName: $(this).data('propertyname')
+                    }
+                },
+                callback: function (value, settings) {
+                    var jsonData = $.parseJSON(value);
+                    if (jsonData.status) {
+                        $(this).text(jsonData.value);
+                    }
+                    else {
+                        $(this).text(oldValue);
+                    }
+                }
+            })
+            $('.editSelect').editable('/home/saveuser', {
+                cssclass: 'jeditForm',
+                tooltip: 'click to edit me...',
+                width: 'none',
+                height: 'none',
+                type: 'select',
+                submit: 'ok',
+                loadurl: '/home/GetUserRoles',
+                loaddata: function () {
+                    return { id: $(this).data('id') }
+                },
+                onsubmit: function (settings, original) {
+                    oldValue = original.revert;
+                },
+                submitdata: function () {
+                    return {
+                        id: $(this).data('id'),
+                        PropertyName: $(this).data('propertyname')
+                    }
+                },
+                callback: function (value, settings) {
+                    var jsonData = $.parseJSON(value);
+                    if (jsonData.status) {
+                        $(this).text(jsonData.value);
+                    }
+                    else {
+                        $(this).text(oldValue);
+                    }
+                }
+            })
+
+            $('.editDate').editable('/home/saveuser', {
+                cssclass: 'jeditForm',
+                tooltip: 'click to edit me...',
+                type: 'datepicker',
+                datepicker: {
+                    dateFormat: 'dd-mm-yy',
+                    changeMonth: true,
+                    changeYear: true
+                },
+                onsubmit: function (settings, original) {
+                    oldValue = original.revert;
+                },
+                submitdata: function () {
+                    return {
+                        id: $(this).data('id'),
+                        PropertyName: $(this).data('propertyname')
+                    }
+                },
+                callback: function (value, settings) {
+                    var jsonData = $.parseJSON(value);
+                    if (jsonData.status) {
+                        $(this).text(jsonData.value);
+                    }
+                    else {
+                        $(this).text(oldValue);
+                    }
+                }
+            })
+
+            $('editSelect').click(function () {
+                $('select', this).addClass('from-controll pull-left w100');
+                $('button', this).addClass('btn btn-sm btn-info margin10');
+            })
+        })
+    </script>
+}
+
+
+
+
+
